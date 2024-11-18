@@ -1,0 +1,13 @@
+name: G-Worlds
+version: '1.0-SNAPSHOT'
+main: fr.the__glacier.gworlds.GWorlds
+api-version: '1.21'
+prefix: G-Worlds
+authors: [ The__Glacier ]
+description: A minecraft world manager plugin
+folia-supported: true
+depend: [G-Core]
+commands:
+  gworlds:
+    description: Worlds manager command
+    alias: [gworld, gw]

@@ -1,58 +1,73 @@
 package fr.the__glacier.gworlds.commands.GWorldsSubCommand;
 
-import fr.the__glacier.gcore.commands.utils.SubCommandInterface;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import fr.the__glacier.gcore.commands.utils.SubCommand;
 import fr.the__glacier.gcore.config.configObjects.SubCommandConfig;
+import fr.the__glacier.gcore.util.TimeUtil;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver;
+import io.papermc.paper.math.FinePosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class TPSubCommand implements SubCommandInterface {
-    SubCommandConfig subCommandConfig;
-    public TPSubCommand(SubCommandConfig config){
-        this.subCommandConfig = config;
-    }
-    @Override
-    public boolean onCommand(@NotNull Plugin plugin, @NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        if (args.length != 4) {
-            commandSender.sendMessage("4 arguments");
-            return true;
-        }
-        if (commandSender instanceof Player p){
-            p.teleportAsync(new Location(Bukkit.getWorld(args[3]), Long.parseLong(args[0]), Long.parseLong(args[1]), Long.parseLong(args[2])));
-            commandSender.sendMessage("Téléporté !");
-        }
-        commandSender.sendMessage("Terminé !");
-        return true;
+public class TPSubCommand extends SubCommand {
+    public TPSubCommand(SubCommandConfig config, TimeUtil.CooldownManager cooldownManager, String cooldownMessage){
+        super(config, cooldownManager, cooldownMessage);
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull Plugin plugin, @NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        switch (args.length){
-            case 1 : return List.of("<x>");
-            case 2 : return List.of("<y>");
-            case 3 : return List.of("<z>");
-            case 4 : {
-                List<String> list = new ArrayList<>();
-                for (World w : Bukkit.getWorlds()){
-                    list.add(w.getName());
-                }
-                return list;
+    public LiteralArgumentBuilder<CommandSourceStack> getCommand(String s) {
+        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal(s);
+        command.requires(sender -> sender.getSender().hasPermission(this.config.permission));
+
+        command.then(Commands.argument("world", ArgumentTypes.world())
+                .suggests(((context, builder) -> {
+                        Bukkit.getWorlds().stream()
+                                .filter(world -> world.getName().toLowerCase().startsWith(builder.getRemainingLowerCase()))
+                                .forEach(world -> builder.suggest(world.key().asString()));
+                        return builder.buildFuture();
+                    }))
+                .then(Commands.argument("location", ArgumentTypes.finePosition(true))
+                        .executes(this::tpPlayerLocation)
+                )
+                .executes(this::tpPlayerWorld)
+        );
+
+        return command;
+    }
+
+    private int tpPlayerLocation(CommandContext<CommandSourceStack> context) {
+        World world = context.getArgument("world", World.class);
+        FinePositionResolver resolver = context.getArgument("location", FinePositionResolver.class);
+        try {
+            FinePosition position = resolver.resolve(context.getSource());
+            if (context.getSource().getSender() instanceof Player p){
+                p.teleportAsync(position.toLocation(world));
+                p.sendMessage("Téléporté !");
+            } else {
+                context.getSource().getSender().sendMessage("Tu n'es pas un joueur !");
             }
-            default: return null;
+            return 1;
+        } catch (CommandSyntaxException e) {
+            context.getSource().getSender().sendMessage("Mauvaise position ! " + e);
+            return 0;
         }
     }
-
-    @Override
-    public SubCommandConfig getSubCommandConfig() {
-        return subCommandConfig;
+    private int tpPlayerWorld(CommandContext<CommandSourceStack> context) {
+        World world = context.getArgument("world", World.class);
+        Location loc = world.getSpawnLocation();
+        if (context.getSource().getSender() instanceof Player p){
+            p.teleportAsync(loc);
+            p.sendMessage("Téléporté !");
+        } else {
+            context.getSource().getSender().sendMessage("Tu n'es pas un joueur !");
+        }
+        return 1;
     }
 }

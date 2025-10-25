@@ -41,7 +41,7 @@ public class Commands {
                         0L,
                         true)
         );
-        GWorldsCMD = new CommandConfig("Main plugin command.", "/gworlds", "permission", noPermission, 0L, true, map);
+        GWorldsCMD = new CommandConfig("gworld", "Main plugin command.", "/gworlds", "permission", noPermission, 0L, "You are on cooldown",true, map, List.of("gw", "ceci est un test", "GWORLD", "GWorld"));
     }
 
     public static enum subCommandsEnum{

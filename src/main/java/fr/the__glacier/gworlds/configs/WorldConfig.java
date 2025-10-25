@@ -1,5 +1,6 @@
 package fr.the__glacier.gworlds.configs;
 
+import fr.the__glacier.gcore.config.configObjects.ConfigUtils;
 import fr.the__glacier.gworlds.Enums.Gamerules;
 
 import java.util.Map;
@@ -10,14 +11,16 @@ public class WorldConfig {
     public String worldGenerator;
     public String environment;
     public String difficulty;
+    public ConfigUtils.LocationConfig spawnLocation;
     public Map<Gamerules, Object> gamerules;
 
     public WorldConfig(){
-        this.name = "null";
+        this.name = null;
         this.loadOnServerLoad = false;
         this.worldGenerator = "Default";
         this.environment = "normal";
         this.difficulty = "normal";
+        this.spawnLocation = null;
         this.gamerules = null;
     }
     public WorldConfig(String name, boolean loadOnServerLoad, String worldGenerator, String environment, String difficulty, Map<Gamerules, Object> gamerules){

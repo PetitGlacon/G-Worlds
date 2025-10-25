@@ -1,6 +1,6 @@
 package fr.the__glacier.gworlds.commands.GWorldsSubCommand;
 
-import fr.the__glacier.gcore.commands.utils.SubCommandInterface;
+import fr.the__glacier.gcore.commands.utils.deprecated.SubCommandInterface;
 import fr.the__glacier.gcore.config.configObjects.SubCommandConfig;
 import fr.the__glacier.gcore.util.PlayerUtil;
 import org.bukkit.Bukkit;

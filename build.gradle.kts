@@ -48,8 +48,8 @@ java {
 }
 tasks {
     jar {
-        dependsOn(shadowJar)
-        enabled = true
+        // dependsOn(shadowJar)
+        enabled = false
     }
 
     shadowJar {
@@ -68,11 +68,11 @@ tasks {
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
-            from(components["java"])
+            // from(components["java"])
 
             groupId = "fr.The__Glacier"
             artifactId = "G-Worlds"
-            version = "1.0.0-SNAPSHOT"
+            version = "1.0.0"
 
             artifact(tasks["shadowJar"]) {
                 classifier = ""  // Pas de classifier pour éviter des artefacts multiples

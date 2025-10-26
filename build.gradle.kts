@@ -72,7 +72,7 @@ publishing {
 
             groupId = "fr.The__Glacier"
             artifactId = "G-Worlds"
-            version = "1.0.0"
+            version = "1.0.0-SNAPSHOT"
 
             artifact(tasks["shadowJar"]) {
                 classifier = ""  // Pas de classifier pour éviter des artefacts multiples
